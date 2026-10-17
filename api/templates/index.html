@@ -74,10 +74,11 @@
       display: flex;
     }
     .like-button svg { width: 22px; height: 22px; fill: none; transition: fill 0.15s, color 0.15s; }
-    .like-button:hover svg,
+    .like-button:hover svg { color: #f14c4c; }
     .like-button.liked svg { fill: #f14c4c; color: #f14c4c; }
-    .like-button.liked { cursor: default; }
+    .like-button:disabled { cursor: wait; }
     .like-count { font-size: 0.9rem; color: var(--text); }
+    .like-error { font-size: 0.8rem; color: var(--muted); }
     ::selection { background: #264f78; }
   </style>
 </head>
@@ -127,29 +128,35 @@
 
     <div class="like">
       <button class="like-button{% if liked %} liked{% endif %}" id="like-button"
-              aria-label="Like this post" {% if liked %}disabled{% endif %}>
+              aria-label="Like this post" aria-pressed="{{ 'true' if liked else 'false' }}">
         <svg viewBox="0 0 24 24" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
           <path d="M20.8 4.6a5.5 5.5 0 0 0-7.8 0L12 5.7l-1-1.1a5.5 5.5 0 0 0-7.8 7.8l1 1.1L12 21l7.8-7.5 1-1.1a5.5 5.5 0 0 0 0-7.8z"/>
         </svg>
       </button>
       <span class="like-count" id="like-count">{{ like_count }}</span>
+      <span class="like-error" id="like-error" role="status"></span>
     </div>
   </main>
 
   <script>
     const likeButton = document.getElementById("like-button");
     const likeCount = document.getElementById("like-count");
+    const likeError = document.getElementById("like-error");
 
     likeButton.addEventListener("click", async () => {
-      if (likeButton.classList.contains("liked")) return;
       likeButton.disabled = true;
+      likeError.textContent = "";
       try {
-        const res = await fetch("/like", { method: "POST" });
-        if (!res.ok) throw new Error();
-        const data = await res.json();
+        const res = await fetch("/like", { method: "POST", credentials: "same-origin" });
+        const data = await res.json().catch(() => ({}));
+        if (!res.ok) throw new Error(data.error || `HTTP ${res.status}`);
         likeCount.textContent = data.count;
-        likeButton.classList.add("liked");
-      } catch {
+        likeButton.classList.toggle("liked", data.liked);
+        likeButton.setAttribute("aria-pressed", String(data.liked));
+      } catch (err) {
+        console.error("Like failed:", err);
+        likeError.textContent = "couldn't save like";
+      } finally {
         likeButton.disabled = false;
       }
     });

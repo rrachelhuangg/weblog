@@ -65,6 +65,17 @@ def like_state(device):
         return 0, False
 
 
+def set_device_cookie(response, device):
+    response.set_cookie(
+        DEVICE_COOKIE,
+        device,
+        max_age=DEVICE_COOKIE_MAX_AGE,
+        httponly=True,
+        samesite="Lax",
+        secure=request.headers.get("X-Forwarded-Proto", request.scheme) == "https",
+    )
+
+
 @app.route("/")
 def blog():
     track_visitor()
@@ -79,27 +90,36 @@ def blog():
         liked=liked,
     ))
     if not device:
-        response.set_cookie(
-            DEVICE_COOKIE,
-            secrets.token_hex(16),
-            max_age=DEVICE_COOKIE_MAX_AGE,
-            httponly=True,
-            samesite="Lax",
-            secure=request.headers.get("X-Forwarded-Proto", request.scheme) == "https",
-        )
+        set_device_cookie(response, secrets.token_hex(16))
     return response
 
 
 @app.route("/like", methods=["POST"])
 def like():
+    """Toggle this device's like: like if it hasn't, unlike if it has."""
     if redis is None:
-        return jsonify(error="Likes aren't configured"), 503
+        return jsonify(error="Likes aren't configured (Redis env vars missing)"), 503
     device = device_id()
-    if not device:
-        return jsonify(error="Couldn't identify device"), 400
-    # Each device is stored once in the set, so repeat likes don't add to the count
-    redis.sadd(LIKERS_KEY, device)
-    return jsonify(count=redis.scard(LIKERS_KEY), liked=True)
+    new_device = not device
+    if new_device:
+        # Cookie may have been blocked or not set yet; issue one now
+        device = secrets.token_hex(16)
+    try:
+        # Each device is stored once in the set, so repeat likes don't add to the count
+        if redis.sismember(LIKERS_KEY, device):
+            redis.srem(LIKERS_KEY, device)
+            liked = False
+        else:
+            redis.sadd(LIKERS_KEY, device)
+            liked = True
+        count = redis.scard(LIKERS_KEY)
+    except Exception:
+        app.logger.exception("Failed to update like")
+        return jsonify(error="Couldn't save like"), 500
+    response = jsonify(count=count, liked=liked)
+    if new_device:
+        set_device_cookie(response, device)
+    return response
 
 
 @app.route("/stats")
