@@ -1,0 +1,154 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>{{ blog_title }}</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;700&display=swap" rel="stylesheet">
+  <style>
+    /* VS Code Dark+ palette */
+    :root {
+      --bg: #1e1e1e;
+      --bg-panel: #252526;
+      --border: #3c3c3c;
+      --text: #d4d4d4;
+      --muted: #858585;
+      --blue: #569cd6;
+      --yellow: #dcdcaa;
+      --teal: #4ec9b0;
+      --accent: #007acc;
+    }
+    body {
+      font-family: "JetBrains Mono", Menlo, Consolas, "Courier New", monospace;
+      margin: 0;
+      background: var(--bg);
+      color: var(--text);
+      line-height: 1.6;
+    }
+    header {
+      background: var(--bg-panel);
+      border-bottom: 1px solid var(--border);
+      border-top: 2px solid var(--accent);
+      padding: 16px 20px;
+    }
+    header .blog-title {
+      max-width: 680px;
+      margin: 0 auto;
+      font-size: 1.25rem;
+      font-weight: 700;
+    }
+    header a { color: var(--teal); text-decoration: none; }
+    header a:hover { color: var(--blue); }
+    main {
+      max-width: 680px;
+      margin: 48px auto;
+      padding: 0 20px;
+    }
+    h1 { font-size: 1.25rem; color: var(--yellow); margin: 0 0 0.5rem; }
+    p { font-size: 0.9rem; color: var(--text); margin: 0 0 1rem; }
+    h2 { font-size: 1rem; color: var(--blue); margin: 2rem 0 0.5rem; }
+    .description {
+      font-size: 0.85rem;
+      font-style: italic;
+      color: var(--muted);
+      padding-bottom: 1.25rem;
+      margin-bottom: 1.5rem;
+      border-bottom: 1px solid var(--border);
+    }
+    .like {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      margin-top: 3rem;
+      padding-top: 1.5rem;
+      border-top: 1px solid var(--border);
+    }
+    .like-button {
+      background: none;
+      border: none;
+      padding: 0;
+      cursor: pointer;
+      color: var(--muted);
+      display: flex;
+    }
+    .like-button svg { width: 22px; height: 22px; fill: none; transition: fill 0.15s, color 0.15s; }
+    .like-button:hover svg,
+    .like-button.liked svg { fill: #f14c4c; color: #f14c4c; }
+    .like-button.liked { cursor: default; }
+    .like-count { font-size: 0.9rem; color: var(--text); }
+    ::selection { background: #264f78; }
+  </style>
+</head>
+<body>
+  <header>
+    <div class="blog-title"><a href="/">{{ blog_title }}</a></div>
+  </header>
+  <main>
+    <h1>{{ title }}</h1>
+    <p class="description">{{ description }}</p>
+    <p>some reflections on the work and experiences i've gained after my first two months as a software engineer in northern virginia.
+       side note that i've been an intern at this company for two years prior to starting full-time work. 
+    </p>
+    <h2>projects</h2>
+    <p>i got put on a new project when i started work again at the end of this summer. apparently the project had only been acquired for the 
+      company the friday before the monday i started. the project itself seems to be pretty long-standing within the defense and intelligence community,
+      and seems to be driven by very rapid iteration and testing cycles.
+    </p>
+    <p>for the first full testing event that involved multiple parties, we traveled to georgia in september for a week in september. it was my first work trip, and the 
+      benefits were definitely super nice. big hotel room, free hotel starbucks and nice gym, trying out new cuisines every day for dinner, and going grocery shopping on a reimbursable
+      budget. i also got to see a lot of the tech setup and integration for the project, which was very cool. 
+    </p>
+
+    <h2>technologies</h2>
+    <p>with the growing integration of ai tools into our everyday workflows, i've been able to work on tasks across various project 
+      stacks in a short period of time. the project is responsible for multiple applications that are built on pretty different stacks, and things like 
+      gemini and codex have been helpful in grasping the workings of their large codebases. 
+    </p>
+
+    <p>most of what i've worked on so far has been in data engineering, building a ETL pipeline for geospatial data that plugs into one of the company's
+      products. that work has involved both new and old technologies for me - clickhouse, minio, rustfs, fastapi, etc. i started pivoting towards one of the
+      other products towards the end of this week, which involves a lot of c++ and qml.
+    </p>
+
+    <h2>reflections</h2>
+    <p>
+      it's been fun to come back to the company as a full-time engineer and see how things have changed from being an intern. the office
+      still has banger coffee, food, and drinks every day, and older engineers are always nice and willing to share their knowledge. i feel lucky to be 
+      put on this fast-paced project and to have the opportunity to experience a lot of the iteration and discussions that go into creating a real-world product.
+      the pace of software engineering seems to have increased noticeably, even in the short two years since i've gained a glimpse into the industry, and i'm excited to
+      see what the rest of 2026 brings.
+    </p>
+
+    <div class="like">
+      <button class="like-button{% if liked %} liked{% endif %}" id="like-button"
+              aria-label="Like this post" {% if liked %}disabled{% endif %}>
+        <svg viewBox="0 0 24 24" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+          <path d="M20.8 4.6a5.5 5.5 0 0 0-7.8 0L12 5.7l-1-1.1a5.5 5.5 0 0 0-7.8 7.8l1 1.1L12 21l7.8-7.5 1-1.1a5.5 5.5 0 0 0 0-7.8z"/>
+        </svg>
+      </button>
+      <span class="like-count" id="like-count">{{ like_count }}</span>
+    </div>
+  </main>
+
+  <script>
+    const likeButton = document.getElementById("like-button");
+    const likeCount = document.getElementById("like-count");
+
+    likeButton.addEventListener("click", async () => {
+      if (likeButton.classList.contains("liked")) return;
+      likeButton.disabled = true;
+      try {
+        const res = await fetch("/like", { method: "POST" });
+        if (!res.ok) throw new Error();
+        const data = await res.json();
+        likeCount.textContent = data.count;
+        likeButton.classList.add("liked");
+      } catch {
+        likeButton.disabled = false;
+      }
+    });
+  </script>
+</body>
+</html>
