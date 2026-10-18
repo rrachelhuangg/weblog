@@ -76,16 +76,38 @@ def set_device_cookie(response, device):
     )
 
 
+BLOG_TITLE = "rookie nova swe"
+
+# Newest first. Each post's content lives in templates/posts/<slug>.html
+POSTS = [
+    {
+        "slug": "first-2-months",
+        "title": "my first 2 months as a full-time software engineer",
+        "description": "october 2026",
+    },
+]
+POSTS_BY_SLUG = {p["slug"]: p for p in POSTS}
+
+
 @app.route("/")
-def blog():
+def home():
+    track_visitor()
+    return render_template("home.html", blog_title=BLOG_TITLE, posts=POSTS)
+
+
+@app.route("/posts/<slug>")
+def post(slug):
+    meta = POSTS_BY_SLUG.get(slug)
+    if meta is None:
+        abort(404)
     track_visitor()
     device = device_id()
     like_count, liked = like_state(device)
     response = make_response(render_template(
-        "index.html",
-        blog_title="rookie nova swe",
-        title="my first 2 months as a full-time software engineer",
-        description="october 2026",
+        f"posts/{slug}.html",
+        blog_title=BLOG_TITLE,
+        title=meta["title"],
+        description=meta["description"],
         like_count=like_count,
         liked=liked,
     ))

@@ -1,0 +1,27 @@
+{% extends "base.html" %}
+
+{% block styles %}
+    .post-list { list-style: none; padding: 0; margin: 0; }
+    .post-list li {
+      padding: 1rem 0;
+      border-bottom: 1px solid var(--border);
+    }
+    .post-list a {
+      font-size: 0.95rem;
+      color: var(--yellow);
+      text-decoration: none;
+    }
+    .post-list a:hover { color: var(--blue); }
+    .post-date { display: block; font-size: 0.8rem; color: var(--muted); }
+{% endblock %}
+
+{% block content %}
+    <ul class="post-list">
+      {% for post in posts %}
+      <li>
+        <a href="{{ url_for('post', slug=post.slug) }}">{{ post.title }}</a>
+        <span class="post-date">{{ post.description }}</span>
+      </li>
+      {% endfor %}
+    </ul>
+{% endblock %}
